@@ -1,0 +1,1518 @@
+General notes:
+- global list of army stack (internel data)?
+- global list of unit (display data)?
+- img_base E5FDD8 ?
+- img_base E58A90 ?
+- img_base E58A9C ?
+- img_bsse E58A65 ?
+
+====================================================================================
+Game heap from HeapCreate()
+location: img_base 0xB202E8 
+====================================================================================
+LPSprite:
+location: img_base 0xE58B5C
+====================================================================================
+Camera look at vector:
+X: 0
+Y: img_base 0xB177D8
+Z: img_base 0xB095B4
+
+
+Graphics struct:
+Location: img_base 0xE589B8
+structure:
+
++ 0x60		-> IDirect3D9
++ 0x64		-> LPDIRECT3DDEVICE9
+====================================================================================
+
+E588E8 (Player info?):
+Location: *(img_base 0xE588E8)
+structure:
+
++ 0xACC	-> pointer to list of province struct pointers
+
++ 0xB24	-> GUI object ??? 
+	+ 0x0	-> ??? object's vtable
+		+ 0x90	-> ??? object ??? method
++ 0xB5C -> player_country_tag (4 byte ascii null terminated string)
++ 0xB60 -> player_country_index (starts with 1, in order of countries.txt in common/)
++ 0xD11	-> ??? byte
+
+====================================================================================
+E587E4: (global country struct list)
+Location: *(img_base 0xE587E4)
+structure:
+
++ 0x0	-> number of countries loaded
++ 0x4	-> pointer to list of country struct pointers
+
+NOTE:
+- Grows in order of common/countries.txt
+
+-----------------------------------------------------------------------------
+id and tag struct:
+size : 0x8 ???
+structure:
++ 0x0	-> tag
++ 0x4	-> id
+
+-----------------------------------------------------------------------------
+Country struct:
+size: 0x1708 bytes
+structure:
+
++ 0x1C		-> tag (4 byte ascii null terminated string)
++ 0x20		-> country_id
+
++ 0x68		-> ???
++ 0x110		-> allocation related ???
++ 0x118		-> allocation related list ???
+
++ 0x4C4		-> researching tech linked list tail (reearch related)
++ 0x4C8		-> researching tech linked list head
++ 0x4CC		-> researching tech linked list count 
+
++ 0x7B4		-> army stack linked list tail
++ 0x7B8		-> army stack linked list head (newst created)
++ 0x7BC		-> army stack linked list size
+
++ 0x7D0		-> leadership
+
++ 0x9E8		-> controlled province list tail
++ 0x9EC		-> controlled province list head
++ 0x9F0		-> controlled province list len
+
++ 0x9F8		-> core linked list tail?
++ 0x9FC		-> core linked list head?
++ 0xA00		-> core linked list len?
+
++ 0xA08		-> ??? list tail
++ 0xA0C		-> ??? list head
++ 0xA10		-> ??? list len
+
++ 0xA60		-> ???
+
+
++ 0xBCC		-> unit type ???
+	+ 0x310	-> unit type list ?
+
++ 0xBD4		-> general list tail
++ 0xBD8		-> general list head
++ 0xBDC		-> generals count
+
++ 0xCDC		-> ??? goes into army_stack_internel[0x108]
++ 0xE3C		-> research points (display value x 1000)
+
++ 0xE44		-> ??? list tail
++ 0xE48		-> ??? list head
++ 0xE4C		-> ??? list len
+
++ 0xEA0		-> prestige (display value x 1000)
++ 0x1570	-> ??? bridgade related
++ 0x1574	-> ??? bridgade related
+====================================================================================
+researching tech struct:
+size: ???
+structure:
+
++ 0x0	-> vtable
++ 0x8	-> current research point in
++ 0xC	-> research points need
++ 0x14	-> country tag
++ 0x18	-> country id
+
+====================================================================================
+unit type (dragoon, infantry...) struct:
+size: ???
+structure:
+
++ 0x8 	-> name (std::string)
++ 0x18	-> name_len
++ 0x38	-> organization? attack? strength? it will be displayed on map
+
+-----------------------------------------------------------------------------
+
+brigade linked list node:
+size: 0x16 ???
+structure:
+
++ 0x0	-> ptr_to_data (army stack)
++ 0x4	-> next node
++ 0x8	-> prev node
++ 0xC	-> ???
+
+bridgade struct:
+size: ???
+structure:
+
++ 0x38 	-> ???
++ 0x3C	-> number of soldiers (ex. 3000 on fresh brigade)
++ 0x40	-> ??? number
++ 0x44	-> brigade_name (std::string)
++ 0x54	-> bridgade_name_len
++ 0x60	-> country_tag
++ 0x64	-> country_id
+
++ 0x74	-> ???
+
+====================================================================================
+army stack linked list node:
+size: 0x16???
+structure:
+
++ 0x0	-> ptr_to_data (army stack)
++ 0x4	-> next node
++ 0x8	-> prev node
++ 0xC	-> ???
+
+Army stack struct (internal data):
+Size: 0x1C8 bytes?
+Structure:
+
+v + 0x28		-> has collection all brigade numbers function
+
++ 0x0			-> vtable
+
++ 0x4 (BYTE) 	-> is selected
++ 0x8			-> ??? object
+
++ 0x38			-> brigade linked list tail
++ 0x3C			-> brigade linked list head
++ 0x40			-> brigade linked list size
+
++ 0xA8			-> ???
++ 0xB4			-> turn angle
++ 0xBC (BYTE)	-> ???
+
++ 0xC0			-> owner country tag
++ 0xC4			-> owner country id
++ 0xC8			-> ??? tag
++ 0xCC			-> ??? id
+
++ 0xD8			-> stack general addr
+
+NOTE: path linked list node first 4 bytes is province index
++ 0xE4			-> path linked list tail 
++ 0xE8			-> path linked list head (destination)
++ 0xEC			-> path linked list size
+
++ 0x108			-> ??? inheret from country[0xCDC]
++ 0x10C			-> addr of display data
+
++ 0x110			-> selected list?
+
++ 0x114			-> stack name ptr (std::string)
++ 0x124			-> stack name len
++ 0x138			-> ??? (activate when selected)
++ 0x144			-> ???
++ 0x164 (BYTE)	-> ???
+
++ 0x18C			-> ???
+vtable:
+
++ 0x3C			-> is naval unit() 
+
+-----------------------------------------------------------------------------
+
+Army stack struct (display data):
+size: 0x168 bytes
+Structure:
+
+
++ 0x29 (BYTE)	-> Is within screen
+
++ 0x4D	(BYTE)	-> ??? 
+
++ 0x54			-> 4x4 matrix a11	1, 0, 	0, 0
++ 0x58			-> a12				0, 1, 	0, 0
++ 0x5C			-> a13				0, -0, 	1, 0
++ 0x60			-> a14				0, 0.5, -2, 1
++ 0x64			-> a21
++ 0x68			-> a22
++ 0x6C			-> a23
++ 0x70			-> a24
++ 0x74			-> a31
++ 0x78			-> a32
++ 0x7C			-> a33
++ 0x80			-> a34
++ 0x84			-> a41	
++ 0x88			-> a42
++ 0x8C			-> a43	
++ 0x90			-> a44
+
++ 0x94			-> 4x4 matrix a11	1, 0,	0, 0
++ 0x98			-> a12				0, 1,	0, 0
++ 0x9C			-> a13				0, 0,	1, 0
++ 0xA0			-> a14				x, 0.5, y, 1
++ 0xA4			-> a21
++ 0xA8			-> a22
++ 0xAC			-> a23
++ 0xB0			-> a24
++ 0xB4			-> a31
++ 0xB8			-> a32
++ 0xBC			-> a33
++ 0xC0			-> a34
++ 0xC4			-> a41	(world X?)
++ 0xC8			-> a42	(world Y?)
++ 0xCC			-> a43	(world Z?)
++ 0xD0			-> a44
+
++ 0xD8 			->
++ 0xDC			->
++ 0xE8			->
++ 0xEC			->
+
++ 0x148			-> location
+
++ 0x1F8			-> 4x4 matrix
+
+-----------------------------------------------------------------------------
+trait mod struct:
+size: ???
+structure:
+
++ 0x0		-> vtable
++ 0x4		-> name (std::string)
++ 0x14		-> len
+
+-----------------------------------------------------------------------------
+
+trait mod list:
+size: ???
+structure:
+
++ 0x0		-> TRAIT_NONE magnitude
++ 0x4		-> TRAIT_NONE addr
++ 0x8		-> ATTACK (display x1000)
++ 0xC		-> 
++ 0x10		-> DEFEND (display x1000)
++ 0x14		->
++ 0x18		-> MORALE (display x100)	
++ 0x1C		-> 
++ 0x20		-> ORGANIZATION (display x100)
++ 0x24		->
++ 0x28		-> RECON 
++ 0x2C		->
++ 0x30		-> SPEED
++ 0x34		->
++ 0x38		-> ATTRITION
++ 0x40		->
++ 0x44		-> EXPERIENCE
++ 0x48		->
++ 0x4C		-> RELIABILITY
+
+-----------------------------------------------------------------------------
+
+trait struct:
+size: ???
+structure:
+
++ 0x0		-> vtable
++ 0x18		-> trait mod list addr
++ 0x2C		-> trait name (std::string)
++ 0x3C		-> name len
+
+-----------------------------------------------------------------------------
+
+General struct:
+Size: ???
+Structure:
+
++ 0x7C		-> personality addr
+
++ 0x80		-> background addr
+
++ 0x88		-> stack internal addr
+
++ 0x94		-> general name ptr(std::string)
+
++ 0xA4		-> name len
+
++ 0xB4 		-> portrait struct
+
++ 0xD8		-> prestige (display *10, 50.00% = 500)
++ 0xDC		-> MORALE magnitude
++ 0xE0		-> MORALE trait mod addr
+
++ 0x110		-> ORGANIZATION moagnitude
++ 0x114		-> ORGANIZATION trait mod addr
+====================================================================================
+Province list:
+
+location: *(E588E8 + 0xACC)
+structure:
+
++ 0x0	-> start of province list
++ 0x4	-> end of province list
+
+Province struct:
+size: 0x23D8
+
+structure:
+
++ 0xC	-> byte is_selected
+
++ 0x58 	-> province_id
++ 0x5C	-> display structure addr
+
++ 0xFC	-> army linked list tail
++ 0x100 -> army linked list head
++ 0x104	-> army linked list size
+
++ 0x110	-> ???
+
++ 0x128	-> owner_country_tag
++ 0x12C	-> owner_country_id
++ 0x130	-> controller_country_tag
++ 0x134 -> controller_country_id
+
+
+
+-----------------------------------------------------------------------------
+
+Province display struct:
+size: 0x910
+
+structure:
+
++ 0x18 	-> addr of province struct
++ 0x2A	-> troops on there?
+
+//positions.txt
+
++ 0x44	-> text_x
++ 0x48  -> text_y
+
++ 0x7C	-> unit_x (int)
++ 0x80	-> unit_y (int)
+
++ 0xE4	-> province_name std::string
++ 0xF4	-> province_name_len
+
++ 0x1C4	-> mil_con_icon_x
++ 0x1C8	-> mil_con_icon_y
+
++ 0x168 -> struct to province render related (dynamically allocated, only allocate if army present, not moving, and province visible)
+	+ 0x18	-> changes when province position is changed
+	+ 0x1E	-> changes when zoom is changed
+	+ 0x28	-> screen info struct?
+		+ 0xA0	-> model information?
+			+ 0x54	-> 4x4 matrix which sometimes contains screen X and negative Y
+			+ 0x94 	-> 4x4 matrix containing X coord and negative 12 offseted y coord
+			+ 0x1C0	-> x screen
+			+ 0x1C4	-> y screen
+		+ 0x1E4	-> x?	(FLOAT)
+		+ 0x1E8	-> invent sign y?	(FLOAT)
+	
+	+ 0x98	-> ???
+	+ 0x94	-> ???
+
++ 0x16C	-> moving render struct
++ 0x17C	-> dock render struct
++ 0x180	-> combat render
+	+ 0x2C	-> screen info
+	+ 0x30	-> screen info
+
+	
++ 0x1A0	-> ???
++ 0x1A4	-> ???
+====================================================================================
+command struct??
+size: ???
+location: ???
+
+structure:
+
++ 0x3C	-> country tag
++ 0x40	-> country id
++ 0x44 	-> province id
+
++ 0x48 	-> ??? struct
+	+ 0x0 	-> army_id ???
+	+ 0x4	-> ???
+Points of interest==================================================================
+
+
+army stack related -------------------------------------------------------------------
+
+img_base 0x5C1D40 (A94/A98struct, struct(#EAX)) { 	#is id used?
+
+	var1 = struct.0x0
+	var1 << 16
+	var1 += struct.0x4
+	
+	remainder = var1 % A94/A98.0x4
+	var2 = *(A94/A98.0x8 + remainder * 4)		#linked list head?
+
+	if(var2 == NULL) {
+		ret 0
+	}		
+	
+	while(var2.0x4 != NULL) {
+		
+		var3.0x0 = var2->0x0
+		var3.0x0 += 8	
+	
+		if(var3.0x4 == struct.0x4 && var2->0x8 == struct.0x0) {
+			var3.0x0[lowest byte] = 1	
+		} else {
+			var3.0x0[lowest byte] = 0
+		}
+
+		if(var3.0x0[lowest byte] != 0) {
+			ret var2
+		}
+		
+		var2 = var2.0x4
+
+	}	
+	
+	ret 0
+}
+
+
+//army_struct.0x8.0x18()
+img_base 0x5C1390 (*this (ecx), *arg.1(#EBP+8)) {  #id related???
+
+	buff[100]
+
+
+	ESI = arg.1
+	
+	EDI = this
+	
+	buff[0x4] = arg1->0x0
+	buff[0x8] = arg1->0x4
+	
+	ecx = *img_base E58A94
+
+	if(arg1->0x0 <= 0x1268) {
+		var2 = *img_base E58A98
+	}
+
+	if(ecx != 0) {
+		eax = &(buff[0x4])
+		ret = img_base 0x5C1D40(var2, &arg.1)
+		if(ret != 0) {
+			failed to create id	
+		}
+	}	
+
+	buff[14] = *img_base E68FEC
+	buff[18] = *img_base E68FF0
+
+	if(*img_base E68FF0 == arg.1.0x4 && *img_base E68FEC == arg.1.0x0) {
+		img_base 0x5C19F0() without set and ret
+		
+		struct.0x8 = var1
+		struct.0xc = *img_base E58A9C
+		
+	} else {
+		struct.0x8 = arg.1.0x0
+		struct.0xc = arg.1.0x4
+	}
+	
+	EAX = struct
+
+
+}
+
+img_base 0x91620 ( struct_ptr ) {		#fill in some kind of struct (initializing)
+
+	buff[8]
+	struct_ptr	[0] = 0x664E20
+			[4] = 0x18D
+			[8] = *(0x1128FEC)
+			[12] = *(0x1128FF0)
+			[16] = 0 		#byte
+			[20] = 0		#byte			
+			[36] = 0
+			[40] = 0xF
+			[48] = 0x39B7D0
+			[52] = 0		#byte
+			
+			
+	.......	
+	
+}
+
+img_base 0x5C19F0 (struct) { #thread switching
+	
+	thread_switch()
+	
+	var1 = *img_base E58A90 (#short) + 0x1268
+	*img_base E58A9C += 1
+	*img_base F1CA68 (#byte) = 0
+
+	struct.0x0 = var1
+	struct.0x4 = *img_base F58A9C
+
+	ret &struct
+}
+
+img_base 0x91AC0(char* bridgate_name (EBP+C), new_stack_struct_ptr (ESI) ) {	
+	
+
+}
+
+new_army_struct.vtable[32](self (#ECX) ) {
+	ESI = self
+	
+	buff[48]
+	
+	if(self->0x88 == 0) {
+		ret
+	}
+	
+	if(self->0x78 >= 1) {
+		ret
+	}
+	
+	buff[8] = self->0x4C		//tag
+	
+	unit_country_ptr
+	
+	push &buff[4]
+	push 0
+	push 0
+	push self->0x48
+	push self
+	push &buff[16]
+	push country_ptr
+	
+	buff[4] = 0				//dword
+	
+	img_base 0xFA8B0()		//making regiment
+	
+}
+
+img_base 0x113CB0 {
+	//country army stack operation
+	
+}
+
+img_base 0x1BC8D ( province_id (#EAX) ) { #add unit console routine
+
+	E588E8 struct
+	
+	E587E4 struct (#countries list)
+
+	province_struct = province_list[province_id]
+	
+	province_display_struct = province_struct[0x5C]
+	
+	if(??? province member1[0x2A] == 0) {	 
+	
+		player_country_tag = E588E8 struct[B5C]
+		player_country_index = E588E8 struct[B60]
+
+		[ebp-0x14] = tag
+
+		countries_list = E587E4[4]
+		country_struct = countries_list[player_country_index]
+				
+		
+	} else {
+
+		province_country_tag = province_struct[0x130]
+		province_country_index = province_struct[0x134] 
+		
+		[ebp-0x14] = tag
+
+		countries_list = E587E4[4]
+		country_struct = countries_list[province_country_index]
+	}
+
+	
+	new_army_struct_ptr = &[ebp-0x108]			#buff starting at ebp-108
+
+	img_base 0x91620 (struct_ptr)			#fills in a struct
+	
+	ESI = tag (#ebp-0x14)
+	??? ret = img_base 5C19F0(tag)			#thread switching funtion
+	
+	img_base 0x5C1390([ebp-0x108], [ebp-0x14], ??? ret)
+	
+	...
+	
+	new_army_struct.vtable = new_army_struct[0]
+	new_army_struct.vtable[32](self)
+	
+	....
+	
+	img_base 0x91AC0(&new_army_struct (#EBP-0x108), brigade_name)
+}
+
+------------------------------------------------------------------------------------------------------
+//teleport stacks
+img_base 0x1FED6() {
+
+	int ret
+	??? object = *(E588E8 struct + 0xB24)
+	??? ptr = (??? object).(??? method)		#EAX = *(*(??? object + 0x0 (#vtable) ) + 0x90)
+							#Call EAX
+
+							#EAX possible function to get selected unit
+							#return is possible ptr 
+	if( ??? ptr == NULL(0) ) {
+		did not select transportable unit
+	}
+
+	std::string province_id
+	ret = img_base 0x6AF0C5(province_id.data())	#img_base 0x6AF0C5 takes province id string and return province list index???	
+	
+	if(ret <= 0) {
+		jumped over all codes...
+	}
+
+	province_struct = *(province_list_ptr[ret])
+	
+	__fastcall img_base 0x1D1890(??? ptr (#ECX) )
+	
+	__fastcall img_base 0x1CB2C0(??? ptr (#ECX), province_struct(#Pushed) )
+	
+}
+
+display related -------------------------------------------------------------------
+
+ model_display.vtable[0x28] img_base 0x65EB00(*this(ecx), arg1(ebp+8), arg2(ebp+c), *arg3(ebp+10) {
+	esi = this
+	
+	//+0x1C0 -> X, +0x1C4 -> Y
+	
+	
+	this->0x1C0 = this->0x188
+	this->0x1C8 += (this->0c1C0 - this->0x188)
+	
+	this->0x1C4 = this->0x18C
+	this->0x1CC += (this->0x1C4 - this->0x18C)
+	
+	this->0x1C8 = this->0x1A0
+	this->0x1CC = this->0x1A4
+	
+	
+	this->0x1BC.vtable[0x3C](this->0x1BC, &this->0x16C)
+	
+	...
+	
+	ecx = arg3
+	eax = (DWORD) arg3->0x30
+	//X set 
+	this->0x1C0 = eax
+	
+	...
+	
+	xmm1 = arg3->0x34
+	xmm0 = (DWORD) this->0x1C4 //this->0x1C4 never change
+	xmm0 = (float) xmm0
+	xmm0 = (double) xmm0
+	xmm1 = (double) xmm1
+	xmm0 -= xmm1
+	eax = (DWORD) xmm0
+	//Y set
+	this->0x1C4 = eax
+}
+
+model_display.vtable[0x50](*this(ecx)) {
+	local[0x10]
+	
+	esi = &local[0x8]
+	edi = ecx
+	
+}
+
+img_base 0x3EC400(arg1(addrs of matrix), arg2, arg3, arg4, arg5) { 	#modifies army display x and y
+
+	buff[48]
+	
+	army_display_object = arg2
+	
+	if(army_display_object == NULL) {		
+		ret
+	}
+	
+	while(army_display_object != NULL) {
+		
+		EAX = &[ebp-44]
+		img_base 0x8B00( EAX )
+		
+		Matrix_out (#ebp -44)
+		D3DXMatrixMultiply(&matrix_out, &army_display_object.fixed_matrix(0x54), arg1)
+		
+		/*
+		example calculation:
+		
+		ebx+54 (fixed):
+		1, 0, 	0, 0
+		0, 1, 	0, 0	
+		0, -0, 	1, 0
+		0, 0.5, 0, 1
+		
+		ebp+8
+		1, 		0, 0, 		0
+		0, 		1, 0, 		0
+		0, 		0, 1, 		0
+		19.61, 	0, 2.93, 	1
+		
+		result (out):
+		1, 		0,		0, 		0
+		0, 		1,		0, 		0
+		0, 		0,		1, 		0
+		19.61, 	0.5,	2.93, 	1
+		
+		*/	
+		memcpy(&army_display.0x94, &out, 0x10)
+		
+		ret = army_display_object.0x144(this, arg3) {
+			byte tmp = *((BYTE*)arg3)
+			this.0x40 = tmp
+		}
+		
+		if(arg3 != 0) {
+			ret = army_display_object.0x4C(this) {
+				return this.0xEC
+			}
+			
+			if(ret != 0) {
+				ret = army_display_object.0x44(this) {
+					return this.0xE8
+				}
+				
+				if(ret != 0 && arg5 != 0) {
+					ret_object = army_display_object.0x44(this)
+					ret = ret_object.0x20(this, army_display_object)
+				}
+			}
+		}
+		
+		if(army_display_object.0xDC != 0) {
+			recurse(&matrix_out, ret, arg3, arg4, arg5)
+		}
+		
+		army_display_object = army_display_object.0xD8
+	}
+	
+}
+
+//sets the screen x and y coord that will be applied to a matrix
+model_info.vtable[0xCC](*this(ecx), *arg1(ebp+8)) {
+	local[0x54]
+	
+	xmm1 = *(img_base 0xB092FC) //usually 3F800000 float for 1
+	
+	edi = arg1
+	esi = this
+	xmm0 = arg1->0x0
+	xmm0 = (float) xmm0
+	this->0xFC = xmm0
+	xmm0 = arg1->0x4
+	xmm0 = (float) xmm0
+	this->0x100 = xmm0
+	
+	make_identity_matrix(&local[0x14])
+	eax = this->0x104 //int
+	ecx = this->0x106 //int
+	
+	xmm0 = 0
+	xmm0 = (double) eax
+	xmm0 = xmm0 * *(img_base 0xA456D0) //double
+	xmm0 = xmm0 * *(img_base 0xA45668) //double
+	xmm0 = (float) xmm0
+	
+	local[0x4] = xmm0
+	
+	xmm0 = 0
+	xmm0 = (double) ecx
+	xmm0 = xmm0 * *(img_base 0xA45668) //double
+	local[0xC] = xmm0
+	
+	eax = &local[0x8]
+	this->vtable[0xD8](eax) {
+		*eax = 0
+	}
+	
+	eax = *(&local[0x8] + 0x2)
+	
+	
+	memcpy(&this->0x58, &esp->0x20, 0x10)
+}
+
+//setting screen coordinate
+//fastcall?
+img_base 0x59A200 (arg1(ecx), *matrix1(ebp+8), *model_info(ebp+c)) {
+	
+	local[0x54];
+	
+	ebx = arg2
+	
+	buff[0x48] = arg1
+	buff[0x4C] = model_info
+	
+	if(model_info == NULL) {
+		return
+	}
+
+	tmp = model_info
+	while(tmp != NULL) {
+		
+		
+		byte ret = arg2->vtable[0x3C]()
+		byte local[0x53] = ret
+		
+		if(arg2->0xDC != 0) {
+			byte ret = arg2->vtable[0x158]()
+			&arg2[3] = 0
+			if(ret == 0) {
+				&arg2[3] = 1
+			}
+		} else {
+			&arg2[3] = 0
+		}
+		
+		if(buff[0x53] == 0 && buff[0x53] == &arg2[3]) {
+			arg2 object = arg2 object.0xD8
+		}
+
+		memcpy(&local[0x4], matrix1, 16)
+
+		buff[34] = (float)((double) buff[34] + (double) arg2->0x84)
+		buff[38] = (float)((double) buff[38] + (double) arg2->0x88)
+		
+		buff[3C] = *img_base 0xB092DC
+		buff[40] = *img_base 0xB092FC
+		
+		memcpy(&arg2->0x94, &local[4], 16)
+		
+		if(byte ret == 0){
+			if(&arg2[3] == 0) {
+				tmp_obj = tmp_obj->0xD8
+				continue
+			}
+			
+			recurse(local[0x48], &local[4], tmp_obj->0xDC)
+		}
+		
+		*img_base 0xE58A70++
+		tmp_obj.vtable[0x20]()
+		
+		//push back tmp into the vector at &arg1->0xF8
+		//if tmp is not a vector element
+		if(&local[0x4C] >= arg1->list1_end || arg1->list1_start > &local[0x4C]) {
+			if(arg1->list1_end == arg1->list1_tail) {
+				vector_check_and_alloc(&arg1->0xF8)
+			}
+			
+			if(arg1->list1_end != NULL) {
+				*arg1->list1_end = ebx
+			}
+			
+		} else {
+			index = (&local[0x4C] - arg1->list1_start) / 4 //singed shift
+	
+			if(arg1->list1_end == arg1->list1_tail) {
+				vector_check_and_alloc(&arg1->0xF8)
+			}
+			
+			if(arg1->list1_end != NULL) {
+				edx = arg1->list1_start + edi * 4
+				*arg1->list1_end = edx
+			}
+		}
+		arg1->list1_end += 4
+		
+		//pushing back tmp in another list &arg1->0x50
+		if(&local[0x4C] >= arg1->list2_end || arg1->list2_start > &local[0x4C]) {
+			if(arg1->list2_end == arg1->list2_tail) {
+				vector_check_and_alloc(&arg1->0x50)
+			}
+			
+			if(arg1->list2_end != NULL) {
+				*arg1->list2_end = ebx
+			}
+		} else {
+			index = (&local[0x4C] - arg1->list2_start) / 4 //singed shift
+	
+			if(arg1->list2_end == arg1->list2_tail) {
+				vector_check_and_alloc(&arg1->0x50)
+			}
+			
+			if(arg1->list2_end != NULL) {
+				edx = arg1->list2_start + edi * 4
+				*arg1->list2_end = edx
+			}
+		}
+		arg1->list2_end += 4
+		
+		edi = arg1
+		
+		ecx = img_base 0xF1C914
+		xmm0 = img_base 0xF1C90C
+		
+		push 0
+		push 
+		
+		local2[0xC]
+		eax = esp
+		*((int64*) eax) = xmm0
+		eax->0x8 = ecx
+		eax = arg1->0x3C
+		ecx = arg1->0x38
+		
+		push
+		push eax
+		push ecx
+		ecx = ebx
+		tmp.vtable[0x50]()
+		
+		push 0.0 onto st stack
+		st(0) <-> st(1)
+		compare st(0) st(1)
+		st(0) = st(0)
+		ah = EFLAGS(SF,ZF...)
+		
+		if(*((char*)(ah & 0b01000100)) parity is odd) {
+			if(tmp->0x28 != 0 || ...) {
+				vector operations ...
+			}
+		}
+		
+		if(&model_info[3] == 0) {
+			tmp = tmp->0xD8
+			continue
+		}
+		
+		recurse(local[48], &local[0x4], tmp->0xDC)
+		
+		tmp_obj = tmp_obj->0xD8
+	}
+}
+
+===================================================
+#mechanism of province army list
+
+konigsberg 695
+
+
+
+//calls when mouse click and button press
+#fully reversed
+byte	delete_and_free_node(node, list) //img_base 0x1F2AE0
+		vector_push_back(**item, *vector) //img_base 0x28F390
+		get_tag_id_by_tag(*g_country_list, *id_tag_out, char *tag) //img_base 0x15C6C0
+			
+img_base 0x6513F0(vector(eax)) {
+	esi = vector
+	
+	diff = vector->end - vector->start
+	size = diff / 4 //signed right shift
+	if(size >= 0x3FFFFFFE) {
+		img_base 0x6AD3AD("vector<T> too long")
+	}
+	
+	
+	diff = vector->tail - vector->start
+	eax size++
+	ecx capacity = diff / 4 //signed right shift
+	if(size <= capacity) {
+		return
+	}
+	
+	//if new size exceeds capacity
+
+	edx = capacity
+	edx = capacity / 2 //unsigned right shift
+	edi = 0x3FFFFFFE
+	edi -= (capacity / 2)
+	if(edi >= ecx) {
+		ecx += edx
+		if(ecx < eax){
+			ecx = eax
+		}
+		push ecx
+		img_base 0xBF300(ecx, vector)
+	}else {
+		ecx = 0
+		if(ecx < eax) {
+			ecx = eax
+		}
+		
+		push ecx
+		img_base 0xBF300(ecx, vector)
+	}
+	return
+}
+
+img_base 0x1C93B0(tag (ebp + 8), id_tag_out(ebp+C), army_struct (esi)) { //assign army and brigade to country
+	local[0x10]
+	
+	ecx = g_country_list
+	push "REB"
+	eax = &id
+	
+	push eax
+	push ecx
+	
+	army_struct->0x144 = 0
+	
+	get_tag_id_by_tag(g_country_list, id_tag_out, "REB")
+	
+	ecx = id
+	
+	byte esp->0x7 = 0
+	
+	if(army_struct->owner_country_id != id){
+		byte esp->0x7 = 1
+	}
+	
+	Node node = army_struct->brigade_list_tail
+	if(node != NULL) {
+		while(node != NULL) {
+			*brigade = node->data 
+			brigade->0x60 = tag
+			brigade->0x64 = id
+			
+			node = node->prev
+		}
+		ecx = id
+	}
+	
+	eax = army_struct->0xCC
+	
+	army_struct->owner_tag = tag
+	army_struct->owner_id = id
+	
+	if(eax == 0 || eax == id) {
+		army_struct->0xC8 = tag
+		army_struct->0xCC = id
+	}
+	
+	if(eax != 0) {
+		if(byte esp->0x7 != 0) {
+			return
+		}
+		
+		if(army_struct->0x108 == 0) {
+			return
+		}
+		
+		army_struct->0x18C = 0
+		0x1CAE80()
+	}
+	
+	return
+}
+
+command_struct.0x18(*this (ECX)) {
+	local_buff[0x60]
+	 
+	edi = this
+	
+	byte local_buff[3] = *img_base 0xE58466
+	ecx = client_struct.province_list[this->province_id]
+	
+	eax = this->0x58
+	
+	
+	local_buff[0x34] = this
+	byte *img_base 0xE58466 = 1
+	local_buff[0x30] = province_struct
+	
+	local_buff[0x4] = 0
+	
+	esi = 0
+	eax -= esi
+	if(eax != 0) {
+		...
+	}
+	
+	//army stack (record size 1C8) ???
+	Army *new_army = allocate(0x1B8 (440) )
+	local_buff[0x38] = ret
+	local_buff[0x68] = 0
+	
+	if(ret != NULL) {
+		new_army = fill_struct(new_army)
+	} else {
+		...
+		eax = 0
+	}
+	
+	new_army = ret
+	local_buff[0x4] = new_army
+	local_buff[0x68] = 0xFFFFFFFF
+	
+	new_army->0x8.0x18(&new_army->0x8, &edi->0x48) //id creation related
+
+	edx = this->country_tag
+	ecx = this->country_id
+	
+	push ecx
+	push edx
+	assign_to_country(country_tag, country_id, new_army)
+	
+	new_army.0x6C(client_struct->0xB24) {
+		new_army->0x108 = client_struct->0xB24
+	}
+	
+	ecx = this->country_tag
+	edx = g_country_list
+	edx = new_army.vtable
+	edi = g_country_list->list[this->country_id]
+	eax = new_army.vtable.0x3C
+	
+}
+
+//process command???
+img_base 0x5AF9F0() {
+	
+	edi vector = ebx->0x44
+	
+	img_base 0x5AFBE0:
+	
+	esi list = ret
+	if(list->count != 0) {
+		
+		//ecx = &ecx dead code ????
+		
+		while(list->size != 0) {
+			ecx = list->tail->data
+			esp->0x10 = list->tail->data
+			vector_push_back(&(esp->0x10), edi)
+			edx = list->tail
+			
+			esp->0x18 = esp
+			esp->0x0 = edx
+			delete_and_free_node(ecx, list)
+		}
+		
+		eax = vector->start
+		ecx = vector->end
+		
+		ecx = ecx - eax
+		ecx = ecx / 4
+		
+		ecx = &eax[ecx]
+		
+		//peek first command
+		esp->10 = edi vector->start
+		esp->0x14 = &(edi vector->start[edi vector->size()])
+		
+		if(!edi vector->empty()) {
+			ret = edi vector[0].0x38()
+			if(ret != 0) {
+				//try to execute some command
+				ebx->0x234 = 1
+				
+				if(img_base 0xE58A65 != 0) {
+					build_string("session.cpp", esp->0x18 std::string)
+					
+					esp->0x1FC = 0
+					*(esp->0x10).0x1C()
+					
+					...
+				}
+				
+				*(esp->0x10)->0x18()
+				
+			}
+		}
+	}
+	
+	
+}
+
+==========================================================================
+network
+
+Data:
+
+[8 bytes] [2nd variable block]...
+
+2nd variable block length -> data + 0x10
+
+==========================================================================
+
+send/recv/dispath func
+
+base + 0x689D00(arg1, arg2 (packet?), arg3) {
+
+	ebx = arg2
+	edi = arg1
+
+	if(arg2 != 0) {
+		arg2->0x0 = 0
+		arg2->0x4 = 0
+		arg2->0x10 = 0
+
+		ret = dispatch_func(arg1, arg2)
+		if(ret == -1) {
+			//error dispatch
+			return -1
+		}
+
+		if(ret = 1) {
+			return 1
+		}
+		
+	}
+
+	ret = timeGetTime()
+	eax = ret - *(base + 0xE58B70)
+	esi = arg3
+	esi += eax
+	*arg3 = *arg3 + (ret - *(base + 0xE58B70))
+
+	ecx = arg3->0x14
+	edx = eax
+	edx -= ecx
+
+	if(edx < 0x5265c00 (86,400,000)) {
+		ecx = edx
+	} else {
+		ecx -= eax
+	}
+
+	if(ecx > 0x3E8 (1000)) {
+		func(arg1)
+	}
+
+	//send
+	ret = send_func(arg2, 1)
+	if(ret == -1) {
+		//error sending out packet
+		return -1
+	}
+	
+	if(ret == 1) {
+		return 1
+	}
+	
+	//recv
+	ret = recv_n_validate_func(arg2)
+	if(ret == -1) {
+		//error erceiving
+		return -1
+	}
+
+	if(ret == 1) {
+		return 1
+	}
+
+	//send
+	ret = send_func(arg2, 1)
+	if(ret == -1) {
+		//error sending out packet
+		return -1
+	}
+	
+	if(ret == 1) {
+		return 1
+	}
+	
+	if(arg2 == 0) {
+		
+	}
+}
+
+==========================================================================
+
+edi/arg1 struct {
++ 0x20 - some ptr
++ 0x7C8 - data*
++ 0x17C8 - data_length
+
+} 
+
+base + 0x688F20(arg1 struct, arg2) {
+
+	//if data less than 12 bytes return
+
+	if(arg1.buff_len < 0xC) {
+		return 0
+	}	
+
+
+	first_short = *((short*) arg1.data)
+	
+	*((short*) arg1.data) = htons(first_short)
+	
+
+	second_int = *((int*) arg1.data + 4)
+
+	*((int*) arg1.data + 4) = ntohl(second_int)
+
+
+	ptr (esi later)
+
+	if(first_short != 0xFFFF) {
+		index = first_short
+
+		if(index >= arg1.0x24) {
+			return 0
+		}
+		
+		index *= 0xE8
+		ptr =  index + edi.0x20
+	
+		if(pointer->0x18 == 0) {
+			return 0
+		}
+
+		if(pointer->0x18 == 0x7) {
+			return 0
+		}
+
+		eax = arg1.0x7C0
+		ecx = ptr->0xC
+
+		if(eax == ecx) {
+			return 0
+		}
+
+		if(ecx != -1) {
+			return 0
+		}		
+		
+		ecx = *(data + 0x8)
+
+		if(ecx != *(esi + 0x8)) {
+			return 0
+		}
+
+		ptr->0xC = *(data + 0x8)
+		ptr->0x10 = arg1.0x7C4
+		ptr->0x34 += arg1.data_len
+		
+	
+	} else {
+
+		ptr = NULL
+	}
+	
+	ebx = &(data + 0xC)
+	
+	ebp-0xC = *((byte*) data + 3)
+	ebp-0x8 = data + 0xC
+
+	if(*((byte*) data + 3) == 0) {
+		goto arg3_end
+	}
+	
+loop_start:
+	
+	//check if data len is <= 0xC
+	if(data+0xC >= arg1.data + arg1.data_len) {
+		goto arg3_end
+	}
+
+	ebp-0x10 = data + 0x18
+
+	//check if data len is < 0x18
+	if(data + 0x18 > data + data_len) {
+		goto arg3_end
+	}
+
+	ebp-0x4 = data + 0x10
+	
+	ret = ntohl(*(data + 0x10))
+	*(data + 0x10) = ret
+
+	//check if 2nd block size is 0
+	if(ret == 0) {
+		goto arg3_end
+	}
+
+	ecx = data_len
+	edx = arg1
+	edx = edx - (data + 0xC)
+	edx = edx + ecx +0x7C8
+
+	/check if 2nd block size is bigger than entire data
+	if(*(data + 0x10) > data_len - 0xC) {
+		goto arg3_end
+	}
+
+	ebp-0xC --;
+	ebp-0x8 += *(data + 0x10)
+
+	//in other words check if first two bytes is FFFF
+	if(ptr== null) {
+		//check if data + 0xC byte isnt 2
+		if(*((byte*) data + 0xC) != 2) {
+			goto arg3_end
+		}
+	}
+
+	eax = ebx + 8
+	*(data + 0x14) = ntohl(*(data + 0x14))
+	switch_var = *(data + 0x14)
+	switch_var--
+	
+	switch(switch_var) {
+
+		case 0:
+
+			ecx = arg3
+			
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+			break
+		case 5:
+		case 6:
+			juicy shit
+		case 7:
+		case 8:
+		case 9:
+		case 10:
+	}
+	
+
+	if(ptr == null) {
+		goto loop count
+	}
+
+	if(*((byte*)ebx + 2) == 1) {
+		goto loop count
+	}
+
+	if(ptr->0x18 == 5) {
+		goto loop count
+	}
+
+	if(ptr->0x18 != 6) {
+		goto loop count
+	}
+
+	if( *((byte*) ebx) != 4) {
+		
+		goto loop count
+	}
+	
+	ecx = data + 0x4
+	
+loop count:
+	if(ebp-0xC > 0) {
+
+		ebx = ebp-0x8
+		goto loop start
+	} else {
+		goto arg2_end
+	}
+
+arg2_end:
+	if(arg2 == 0) {
+		return 0
+	}
+
+	if(arg2->0x0 == 0) {
+		return 0
+	}
+
+	return 1
+
+}
+
